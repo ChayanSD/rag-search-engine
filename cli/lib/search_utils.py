@@ -9,3 +9,8 @@ def load_movies() -> list[dict]:
         data= json.load(f)
     return data["movies"]
 
+
+def load_stop_words() -> list[str]:
+    with open(PROJECT_ROOT / "data" / "stopwords.txt", "r") as f:
+        stop_words = f.read().splitlines()
+    return stop_words

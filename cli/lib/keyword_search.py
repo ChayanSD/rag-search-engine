@@ -1,5 +1,8 @@
-from lib.search_utils import load_movies
+from lib.search_utils import load_movies, load_stop_words
 import string
+from nltk.stem import PorterStemmer
+
+streamer = PorterStemmer()
 
 def clean_text(text: str) -> str:
     text = text.lower()
@@ -8,11 +11,18 @@ def clean_text(text: str) -> str:
 
 def tokenize_text(text: str) -> list[str]:
     text = clean_text(text)
-    tokens = []
+    stopwords = load_stop_words()
+    res = []
+    def _filter(tok):
+        if tok and tok not in stopwords:
+            return True
+        return False
+    
     for tok in text.split():
-         if tok:
-             tokens.append(tok)
-    return tokens
+        if _filter(tok):
+            tok = streamer.stem(tok)
+            res.append(tok)
+    return res
 
 def has_matching_token(query_tokens , movie_tokens):
     for query_tok in query_tokens:
