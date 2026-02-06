@@ -2,16 +2,19 @@
 
 import argparse
 from lib.keyword_search import (search_command
-, build_command)
+, build_command , tf_command)
 def main() -> None:
     parser = argparse.ArgumentParser(description="Keyword Search CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     search_parser = subparsers.add_parser("search", help="Search movies using BM25")
     search_parser.add_argument("query", type=str, help="Search query")
-
-    build_parser = subparsers.add_parser("build", help="Build the inverted index")
-
+    
+    tf_parser = subparsers.add_parser("tf", help="Get term frequency for a document")
+    tf_parser.add_argument("doc_id", type=int, help="Document id to check")
+    tf_parser.add_argument("term", type=str, help="Search Term to count for")
+    
+    subparsers.add_parser("build", help="Build the inverted index")
     args = parser.parse_args()
 
     match args.command:
@@ -24,6 +27,8 @@ def main() -> None:
             results = search_command(args.query, 5)
             for i , result in enumerate(results):
                 print(f"{i} {result['title']}")
+        case "tf":
+            tf_command(args.doc_id, args.term)
         case _:
             parser.print_help()
 
