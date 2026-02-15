@@ -4,6 +4,7 @@ from nltk.stem import PorterStemmer
 from collections import defaultdict , Counter
 import os
 import pickle
+import math
 streamer = PorterStemmer()
 
 class InvertedIndex:
@@ -26,7 +27,21 @@ class InvertedIndex:
        if len(token) != 1:
           raise ValueError("Can only have 1 token")
        return self.term_frequencies[doc_id][token[0]] 
-        
+
+    def get_idf(self , term ) : 
+        token = tokenize_text(term)
+        if len(token) != 1:
+            raise ValueError("Can only have 1 token")
+        token = token[0]
+        doc_count = len(self.docmap)
+        term_match_doc_count = len(self.index[token])
+        return math.log((doc_count + 1) / (term_match_doc_count + 1))
+    
+    def get_tfidf(self, doc_id, term):
+        tf = self.get_tf(doc_id, term)
+        idf = self.get_idf(term)
+        return tf * idf
+
     def get_documents(self, term):
         return sorted(self.index[term])
     
@@ -54,6 +69,18 @@ class InvertedIndex:
            self.docmap = pickle.load(f)
        with open(self.term_frequencies_path, "rb") as f:
            self.term_frequencies = pickle.load(f)
+
+def tfidf_command(doc_id: str, term: str):
+    idx = InvertedIndex()
+    idx.load()
+    tf_idf = idx.get_tfidf(doc_id, term)
+    print(f"TF-IDF score of '{term}' in document '{doc_id}': {tf_idf:.2f}")
+
+def idf_command(term: str):
+    idx = InvertedIndex()
+    idx.load()
+    idf = idx.get_idf(term)
+    print(f"Inverse document frequency of '{term}': {idf:.2f}")
 
 def tf_command(doc_id: str, term: str):
     idx = InvertedIndex()
